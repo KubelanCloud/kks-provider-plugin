@@ -21,6 +21,7 @@ jobs:
       - name: Container image name (GHCR is lowercase)
         run: |
           echo "IMAGE_NAME=${REGISTRY_HOST}/$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+          echo "APP_VERSION=$(grep '^appVersion:' charts/kloud-csi/Chart.yaml | awk '{print $2}' | tr -d '\"')" >> "$GITHUB_ENV"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -38,6 +39,7 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
+            type=raw,value=${{ env.APP_VERSION }},enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,prefix=sha-
             type=semver,pattern={{version}}
@@ -51,3 +53,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Make container image public
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          owner=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          gh api --method PATCH "/orgs/${owner}/packages/container/kks-csi-plugin/visibility" -f visibility=public

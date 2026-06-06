@@ -26,6 +26,10 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "kloud-csi.nodeServiceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       priorityClassName: {{ .Values.node.priorityClassName }}
       hostNetwork: true
       hostPID: true

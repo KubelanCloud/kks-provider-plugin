@@ -14,9 +14,11 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: ghcr.io/KubelanCloud/kks-csi-plugin
-  tag: "latest"
+  repository: ghcr.io/kubelancloud/kks-csi-plugin
+  tag: ""
   pullPolicy: IfNotPresent
+
+imagePullSecrets: []
 
 serverURL: ""
 accessToken: ""
@@ -38,7 +40,7 @@ sidecars:
     tag: v2.12.0
   livenessProbe:
     repository: registry.k8s.io/sig-storage/livenessprobe
-    tag: v2.13.0
+    tag: v2.13.1
 
 storageClass:
   enabled: true

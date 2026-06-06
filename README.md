@@ -139,7 +139,8 @@ Helm fails at render time if `serverURL` or credentials are missing.
 | Value | Default | Description |
 |-------|---------|-------------|
 | `image.repository` | `ghcr.io/KubelanCloud/kks-csi-plugin` | Driver container image |
-| `image.tag` | `latest` | Image tag (defaults to chart `appVersion` if empty) |
+| `image.tag` | *(chart appVersion)* | Image tag (defaults to chart `appVersion` when empty) |
+| `imagePullSecrets` | `[]` | Pull secrets for private registries such as GHCR |
 | `existingSecret` | `""` | Use an existing secret instead of creating one |
 | `existingSecretAccessTokenKey` | `access-token` | Key in the secret holding the token |
 | `driver.name` | `storage.csi.kloud.team` | CSI driver name |
