@@ -1,0 +1,130 @@
+{{- include "kloud-csi.validateRequired" . }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "kloud-csi.nodeName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kloud-csi.labels" . | nindent 4 }}
+    app.kubernetes.io/component: node
+spec:
+  selector:
+    matchLabels:
+      {{- include "kloud-csi.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: node
+  template:
+    metadata:
+      labels:
+        {{- include "kloud-csi.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: node
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "kloud-csi.nodeServiceAccountName" . }}
+      priorityClassName: {{ .Values.node.priorityClassName }}
+      hostNetwork: true
+      hostPID: true
+      {{- with .Values.node.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: kloud-csi-plugin
+          image: {{ include "kloud-csi.driverImage" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          args:
+            - --config-file
+            - /etc/kloud-csi/driver.hcl
+          env:
+            - name: KKS_CSI_SERVER_URL
+              value: {{ .Values.serverURL | quote }}
+            - name: KKS_CSI_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-config" (include "kloud-csi.fullname" .)) .Values.existingSecret }}
+                  key: {{ .Values.existingSecretAccessTokenKey }}
+            - name: KKS_CSI_DRIVER_MODE
+              value: node
+            - name: KKS_CSI_DRIVER_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: KKS_CSI_DRIVER_NAME
+              value: {{ .Values.driver.name | quote }}
+            - name: KKS_CSI_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: kubelet-dir
+              mountPath: /var/lib/kubelet
+              mountPropagation: Bidirectional
+            - name: device-dir
+              mountPath: /dev
+            - name: config
+              mountPath: /etc/kloud-csi
+          {{- with .Values.node.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: node-driver-registrar
+          image: {{ .Values.sidecars.registrar.repository }}:{{ .Values.sidecars.registrar.tag }}
+          args:
+            - --v=2
+            - --csi-address=/csi/csi.sock
+            - --kubelet-registration-path=/var/lib/kubelet/plugins/{{ .Values.driver.name }}/csi.sock
+          env:
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: registration-dir
+              mountPath: /registration
+            - name: kubelet-dir
+              mountPath: /var/lib/kubelet
+              mountPropagation: HostToContainer
+        - name: liveness-probe
+          image: {{ .Values.sidecars.livenessProbe.repository }}:{{ .Values.sidecars.livenessProbe.tag }}
+          args:
+            - --csi-address=/csi/csi.sock
+            - --health-port=9809
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+      volumes:
+        - name: plugin-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/{{ .Values.driver.name }}/
+            type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry/
+            type: Directory
+        - name: kubelet-dir
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
+        - name: device-dir
+          hostPath:
+            path: /dev
+        - name: config
+          configMap:
+            name: {{ include "kloud-csi.fullname" . }}-driver

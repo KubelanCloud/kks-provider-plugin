@@ -1,0 +1,76 @@
+# Kloud CSI driver — install on each user Kubernetes cluster.
+#
+# Required:
+#   serverURL     — URL of the management CSI server (from your Kloud cluster details)
+#   accessToken   — cluster csi_access_token (create a Kubernetes secret or set here)
+#
+# Example:
+#   helm install kloud-csi ./charts/kloud-csi \
+#     --namespace kube-system \
+#     --set serverURL=http://10.0.0.5:9766 \
+#     --set accessToken="$(kubectl get secret ... -o jsonpath='{.data.token}' | base64 -d)"
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: ghcr.io/KubelanCloud/kks-csi-plugin
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+serverURL: ""
+accessToken: ""
+existingSecret: ""
+existingSecretAccessTokenKey: access-token
+
+driver:
+  name: storage.csi.kloud.team
+
+sidecars:
+  provisioner:
+    repository: registry.k8s.io/sig-storage/csi-provisioner
+    tag: v5.1.0
+  attacher:
+    repository: registry.k8s.io/sig-storage/csi-attacher
+    tag: v4.7.0
+  registrar:
+    repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
+    tag: v2.12.0
+  livenessProbe:
+    repository: registry.k8s.io/sig-storage/livenessprobe
+    tag: v2.13.0
+
+storageClass:
+  enabled: true
+  name: kloud-csi
+  isDefault: false
+  reclaimPolicy: Delete
+  volumeBindingMode: WaitForFirstConsumer
+  allowVolumeExpansion: false
+
+controller:
+  replicas: 1
+  resources: {}
+
+node:
+  resources: {}
+  priorityClassName: system-node-critical
+  tolerations:
+    - operator: Exists
+
+serviceAccount:
+  controller:
+    create: true
+    name: ""
+  node:
+    create: true
+    name: ""
+
+rbac:
+  create: true
+
+podLabels: {}
+podAnnotations: {}
+
+nodeSelector: {}
+affinity: {}
