@@ -56,7 +56,22 @@ Driver name: `storage.csi.kloud.team`
 
 ## Install with Helm
 
-Install the chart into each user cluster (typically `kube-system`):
+### From the published chart repository
+
+Charts are published to GitHub Pages on each release:
+
+```bash
+helm repo add kloud-csi https://kubelancloud.github.io/kks-csi-plugin
+helm repo update
+
+helm install kloud-csi kloud-csi/kloud-csi \
+  --namespace kube-system \
+  --create-namespace \
+  --set serverURL=https://csi.example.kloud.team \
+  --set accessToken="YOUR_CLUSTER_CSI_ACCESS_TOKEN"
+```
+
+### From a local checkout
 
 ```bash
 helm install kloud-csi ./charts/kloud-csi \
@@ -92,6 +107,8 @@ kubectl get storageclass kloud-csi
 ## Helm chart
 
 Chart path: [`charts/kloud-csi`](charts/kloud-csi)
+
+Published releases are available at [GitHub Releases](https://github.com/KubelanCloud/kks-csi-plugin/releases) and via the Helm repository at `https://kubelancloud.github.io/kks-csi-plugin`. Bump `version` in [`Chart.yaml`](charts/kloud-csi/Chart.yaml) to publish a new chart release.
 
 ### Required values
 

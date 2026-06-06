@@ -1,0 +1,4 @@
+owner: KubelanCloud
+git-repo: kks-csi-plugin
+pages-branch: gh-pages
+pages-index-path: index.yaml
