@@ -60,18 +60,7 @@ Driver name: `storage.csi.kloud.team`
 
 Charts are published as [GitHub Releases](https://github.com/KubelanCloud/kks-csi-plugin/releases) and to GHCR as OCI artifacts.
 
-**OCI (recommended):**
-
-```bash
-helm install kloud-csi oci://ghcr.io/kubelancloud/charts/kloud-csi \
-  --version 0.1.0 \
-  --namespace kube-system \
-  --create-namespace \
-  --set serverURL=https://csi.example.kloud.team \
-  --set accessToken="YOUR_CLUSTER_CSI_ACCESS_TOKEN"
-```
-
-**GitHub Release asset:**
+**GitHub Release (public):**
 
 ```bash
 helm install kloud-csi \
@@ -81,6 +70,21 @@ helm install kloud-csi \
   --set serverURL=https://csi.example.kloud.team \
   --set accessToken="YOUR_CLUSTER_CSI_ACCESS_TOKEN"
 ```
+
+**OCI (requires GHCR access):**
+
+```bash
+helm registry login ghcr.io
+
+helm install kloud-csi oci://ghcr.io/kubelancloud/charts/kloud-csi \
+  --version 0.1.0 \
+  --namespace kube-system \
+  --create-namespace \
+  --set serverURL=https://csi.example.kloud.team \
+  --set accessToken="YOUR_CLUSTER_CSI_ACCESS_TOKEN"
+```
+
+To allow anonymous OCI pulls, set the `charts/kloud-csi` package visibility to public under **GitHub → Packages**.
 
 ### From a local checkout
 
