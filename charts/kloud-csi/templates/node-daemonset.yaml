@@ -51,6 +51,8 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             privileged: true
+          command:
+            - /kks-csi
           args:
             - --config-file
             - /etc/kloud-csi/driver.hcl

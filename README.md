@@ -138,7 +138,7 @@ Helm fails at render time if `serverURL` or credentials are missing.
 
 | Value | Default | Description |
 |-------|---------|-------------|
-| `image.repository` | `ghcr.io/KubelanCloud/kks-csi-plugin` | Driver container image |
+| `image.repository` | `ghcr.io/kubelancloud/kloud-csi-plugin` | Driver container image |
 | `image.tag` | *(chart appVersion)* | Image tag (defaults to chart `appVersion` when empty) |
 | `imagePullSecrets` | `[]` | Pull secrets for private registries such as GHCR |
 | `existingSecret` | `""` | Use an existing secret instead of creating one |
@@ -246,7 +246,7 @@ docker build -t kks-csi .
 docker run --rm -v "$(pwd)/examples/csi-client.hcl:/csi.hcl:ro" kks-csi -c /csi.hcl
 ```
 
-Container images are published to `ghcr.io/KubelanCloud/kks-csi-plugin` on pushes to `main`.
+Container images are published to `ghcr.io/kubelancloud/kloud-csi-plugin` on pushes to `main`.
 
 ## Development
 

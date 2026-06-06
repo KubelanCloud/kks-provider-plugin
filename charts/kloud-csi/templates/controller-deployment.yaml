@@ -43,6 +43,8 @@ spec:
         - name: kloud-csi-plugin
           image: {{ include "kloud-csi.driverImage" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /kks-csi
           args:
             - --config-file
             - /etc/kloud-csi/driver.hcl
