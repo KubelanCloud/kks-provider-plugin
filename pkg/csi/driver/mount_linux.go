@@ -107,9 +107,15 @@ func cleanupMountPoint(target string, mounter *mount.SafeFormatAndMount) error {
 }
 
 func bindMount(source, target string) error {
-	out, err := exec.Command("mount", "--bind", source, target).CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("bind mount %s -> %s: %w: %s", source, target, err, strings.TrimSpace(string(out)))
+	if !isMounted(source) {
+		return fmt.Errorf("staging path %s is not mounted", source)
+	}
+	if isMounted(target) {
+		return nil
+	}
+	mounter := mount.New("")
+	if err := mounter.Mount(source, target, "", []string{"bind"}); err != nil {
+		return fmt.Errorf("bind mount %s -> %s: %w", source, target, err)
 	}
 	return nil
 }

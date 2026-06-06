@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -91,8 +90,8 @@ func (s *NodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublish
 		return nil, invalidArgument("staging target path is required")
 	}
 
-	if err := os.MkdirAll(filepath.Dir(req.GetTargetPath()), 0o755); err != nil {
-		return nil, internalError(err)
+	if !isMounted(req.GetStagingTargetPath()) {
+		return nil, internalError(fmt.Errorf("staging path %s is not mounted", req.GetStagingTargetPath()))
 	}
 
 	if err := bindMount(req.GetStagingTargetPath(), req.GetTargetPath()); err != nil {

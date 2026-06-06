@@ -16,7 +16,7 @@ fullnameOverride: ""
 image:
   repository: ghcr.io/kubelancloud/kks-csi-plugin
   tag: "latest"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 imagePullSecrets: []
 
