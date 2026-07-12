@@ -3,6 +3,29 @@ entries:
   kks-provider-plugin:
   - apiVersion: v2
     appVersion: 1.1.0
+    created: "2026-07-12T23:11:52.782934936Z"
+    description: Combined Kloud provider plugin chart (LoadBalancer + CSI) for kks
+      clusters
+    digest: d8da56a92d6ec27641fc1631bd07cad1d2f389e4f596f50f0b0680c61e5766da
+    home: https://github.com/KubelanCloud/kks-provider-plugin
+    keywords:
+    - provider
+    - loadbalancer
+    - csi
+    - storage
+    - kloud
+    kubeVersion: '>=1.28.0-0'
+    maintainers:
+    - name: Kloud Team
+    name: kks-provider-plugin
+    sources:
+    - https://github.com/KubelanCloud/kks-provider-plugin
+    type: application
+    urls:
+    - https://github.com/KubelanCloud/kks-provider-plugin/releases/download/kks-provider-plugin-1.1.1/kks-provider-plugin-1.1.1.tgz
+    version: 1.1.1
+  - apiVersion: v2
+    appVersion: 1.1.0
     created: "2026-07-12T12:26:04.019999761Z"
     description: Combined Kloud provider plugin chart (LoadBalancer + CSI) for kks
       clusters
@@ -108,4 +131,4 @@ entries:
     urls:
     - https://github.com/KubelanCloud/kks-csi-plugin/releases/download/kloud-csi-0.1.0/kloud-csi-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-12T12:26:04.020013106Z"
+generated: "2026-07-12T23:11:52.782953004Z"
