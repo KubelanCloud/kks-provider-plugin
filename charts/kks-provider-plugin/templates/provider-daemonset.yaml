@@ -57,8 +57,6 @@ spec:
             - csi
             - --config-file
             - /etc/kloud-csi/driver.hcl
-            - --metrics-bind-address
-            - {{ .Values.metrics.csi.bindAddress | quote }}
           env:
             - name: KKS_CSI_SERVER_URL
               value: {{ .Values.csi.serverURL | quote }}
@@ -157,8 +155,6 @@ spec:
           command:
             - /kks-provider
             - lb-controller
-            - --metrics-bind-address
-            - {{ .Values.metrics.lbController.bindAddress | quote }}
           env:
             - name: KLOUD_LB_API_URL
               value: {{ .Values.lb.serverURL | quote }}
@@ -181,8 +177,6 @@ spec:
           command:
             - /kks-provider
             - lb-speaker
-            - --metrics-bind-address
-            - {{ .Values.metrics.lbSpeaker.bindAddress | quote }}
           securityContext:
             capabilities:
               add:

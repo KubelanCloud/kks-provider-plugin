@@ -11,12 +11,12 @@ The Helm chart deploys one DaemonSet (`kks-provider-plugin-provider`) that runs 
 
 ## Helm Chart
 
-Chart path: `charts/kks-provider-plugin`
+Chart URL: `https://github.com/kubelancloud/kks-provider-plugin/releases/download/v1.0.0/kks-provider-plugin-1.0.0.tgz`
 
 Example install:
 
 ```bash
-helm install kks-provider-plugin ./charts/kks-provider-plugin \
+helm install kks-provider-plugin https://github.com/kubelancloud/kks-provider-plugin/releases/download/v1.0.0/kks-provider-plugin-1.0.0.tgz \
   --namespace kube-system \
   --create-namespace \
   --set lb.serverURL=https://lb.example.kloud.team \
@@ -33,13 +33,11 @@ The container/binary entrypoint is `kks-provider` and exposes:
 - `kks-provider lb-controller`
 - `kks-provider lb-speaker`
 
-Each command also starts a Prometheus metrics endpoint on `/metrics` by default:
+For cluster-wide pod/node resource metrics (for `kubectl top` and autoscaling), deploy Kubernetes metrics-server once per cluster, for example:
 
-- `kks-provider csi` on `:10080`
-- `kks-provider lb-controller` on `:10081`
-- `kks-provider lb-speaker` on `:10082`
-
-You can override the bind address with `--metrics-bind-address` (or disable metrics with `--metrics-bind-address=off`).
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/high-availability-1.21+.yaml
+```
 
 ## Image
 
