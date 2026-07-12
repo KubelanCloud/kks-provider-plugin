@@ -53,7 +53,7 @@ csi:
       repository: registry.kloud.team/kks/sig-storage/csi-attacher
       tag: v4.7.0
     registrar:
-      repository: registry.kloud.team/kks/csi-node-driver-registrar
+      repository: registry.kloud.team/kks/sig-storage/csi-node-driver-registrar
       tag: v2.12.0
     livenessProbe:
       repository: registry.kloud.team/kks/sig-storage/livenessprobe
