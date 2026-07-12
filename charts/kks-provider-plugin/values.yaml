@@ -6,7 +6,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: ghcr.io/kubelancloud/kks-provider-plugin
+  repository: registry.kloud.team/kks/kubelancloud/kks-provider-plugin
   tag: "latest"
   pullPolicy: IfNotPresent
 
@@ -39,24 +39,24 @@ lb:
     name: ""
 
 csi:
-  serverURL: "https://storage.csi.kloud.team"
+  serverURL: "https://storage.csi.onkksmanagement.addresslist.cloud"
   accessToken: ""
   existingSecret: ""
   existingSecretAccessTokenKey: access-token
   driver:
-    name: storage.csi.kloud.team
+    name: storage.csi.onkksmanagement.addresslist.cloud
   sidecars:
     provisioner:
-      repository: registry.k8s.io/sig-storage/csi-provisioner
+      repository: registry.kloud.team/kks/sig-storage/csi-provisioner
       tag: v5.1.0
     attacher:
-      repository: registry.k8s.io/sig-storage/csi-attacher
+      repository: registry.kloud.team/kks/sig-storage/csi-attacher
       tag: v4.7.0
     registrar:
-      repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
+      repository: registry.kloud.team/kks/csi-node-driver-registrar
       tag: v2.12.0
     livenessProbe:
-      repository: registry.k8s.io/sig-storage/livenessprobe
+      repository: registry.kloud.team/kks/sig-storage/livenessprobe
       tag: v2.13.1
   storageClass:
     enabled: true
