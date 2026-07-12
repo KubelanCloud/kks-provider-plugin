@@ -3,7 +3,7 @@ package driver
 import (
 	"context"
 
-	"github.com/KubelanCloud/kks-csi-plugin/pkg/csi/provisioner"
+	"github.com/KubelanCloud/kks-provider-plugin/pkg/csi/provisioner"
 	"github.com/container-storage-interface/spec/lib/go/csi"
 )
 

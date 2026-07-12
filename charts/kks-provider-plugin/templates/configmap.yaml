@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "kloud-csi.fullname" . }}-driver
+  name: {{ include "kks-provider-plugin.fullname" . }}-driver
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kloud-csi.labels" . | nindent 4 }}
+    {{- include "kks-provider-plugin.labels" . | nindent 4 }}
 data:
   driver.hcl: |
     driver {}

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KubelanCloud/kks-csi-plugin/pkg/csi/provisioner"
+	"github.com/KubelanCloud/kks-provider-plugin/pkg/csi/provisioner"
 )
 
 type ClientConfig struct {

@@ -1,0 +1,220 @@
+{{- include "kks-provider-plugin.validateRequired" . }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "kks-provider-plugin.daemonSetName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kks-provider-plugin.labels" . | nindent 4 }}
+    app.kubernetes.io/component: provider
+spec:
+  selector:
+    matchLabels:
+      {{- include "kks-provider-plugin.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: provider
+  template:
+    metadata:
+      labels:
+        {{- include "kks-provider-plugin.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: provider
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "kks-provider-plugin.lbServiceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      priorityClassName: {{ .Values.csi.node.priorityClassName }}
+      hostNetwork: true
+      hostPID: true
+      {{- with .Values.csi.node.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: csi-driver
+          image: {{ include "kks-provider-plugin.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          command:
+            - /kks-provider
+          args:
+            - csi
+            - --config-file
+            - /etc/kloud-csi/driver.hcl
+            - --metrics-bind-address
+            - {{ .Values.metrics.csi.bindAddress | quote }}
+          env:
+            - name: KKS_CSI_SERVER_URL
+              value: {{ .Values.csi.serverURL | quote }}
+            - name: KKS_CSI_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kks-provider-plugin.csiSecretName" . }}
+                  key: {{ .Values.csi.existingSecretAccessTokenKey }}
+            - name: KKS_CSI_DRIVER_MODE
+              value: all
+            - name: KKS_CSI_DRIVER_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: KKS_CSI_DRIVER_NAME
+              value: {{ .Values.csi.driver.name | quote }}
+            - name: KKS_CSI_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: kubelet-dir
+              mountPath: /var/lib/kubelet
+              mountPropagation: Bidirectional
+            - name: device-dir
+              mountPath: /dev
+            - name: config
+              mountPath: /etc/kloud-csi
+          {{- with .Values.csi.node.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: csi-provisioner
+          image: {{ .Values.csi.sidecars.provisioner.repository }}:{{ .Values.csi.sidecars.provisioner.tag }}
+          args:
+            - --csi-address=/csi/csi.sock
+            - --v=2
+            - --feature-gates=Topology=false
+            - --timeout=60s
+            - --leader-election
+            - --default-fstype=ext4
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+          {{- with .Values.csi.controller.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: csi-attacher
+          image: {{ .Values.csi.sidecars.attacher.repository }}:{{ .Values.csi.sidecars.attacher.tag }}
+          args:
+            - --csi-address=/csi/csi.sock
+            - --v=2
+            - --leader-election
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+          {{- with .Values.csi.controller.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: node-driver-registrar
+          image: {{ .Values.csi.sidecars.registrar.repository }}:{{ .Values.csi.sidecars.registrar.tag }}
+          args:
+            - --v=2
+            - --csi-address=/csi/csi.sock
+            - --kubelet-registration-path=/var/lib/kubelet/plugins/{{ .Values.csi.driver.name }}/csi.sock
+          env:
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: registration-dir
+              mountPath: /registration
+            - name: kubelet-dir
+              mountPath: /var/lib/kubelet
+              mountPropagation: HostToContainer
+          {{- with .Values.csi.node.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: csi-liveness-probe
+          image: {{ .Values.csi.sidecars.livenessProbe.repository }}:{{ .Values.csi.sidecars.livenessProbe.tag }}
+          args:
+            - --csi-address=/csi/csi.sock
+            - --health-port=9808
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+        - name: lb-controller
+          image: {{ include "kks-provider-plugin.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /kks-provider
+            - lb-controller
+            - --metrics-bind-address
+            - {{ .Values.metrics.lbController.bindAddress | quote }}
+          env:
+            - name: KLOUD_LB_API_URL
+              value: {{ .Values.lb.serverURL | quote }}
+            - name: KLOUD_LB_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kks-provider-plugin.lbSecretName" . }}
+                  key: {{ .Values.lb.existingSecretAccessTokenKey }}
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          {{- with .Values.lb.controller.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: lb-speaker
+          image: {{ include "kks-provider-plugin.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /kks-provider
+            - lb-speaker
+            - --metrics-bind-address
+            - {{ .Values.metrics.lbSpeaker.bindAddress | quote }}
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: KLOUD_LB_INTERFACE
+              value: {{ .Values.lb.speaker.interface | quote }}
+          {{- with .Values.lb.speaker.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: plugin-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/{{ .Values.csi.driver.name }}/
+            type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry/
+            type: Directory
+        - name: kubelet-dir
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
+        - name: device-dir
+          hostPath:
+            path: /dev
+        - name: config
+          configMap:
+            name: {{ include "kks-provider-plugin.fullname" . }}-driver

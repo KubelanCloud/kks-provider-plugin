@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/KubelanCloud/kks-csi-plugin/pkg/csi/provisioner"
+	"github.com/KubelanCloud/kks-provider-plugin/pkg/csi/provisioner"
 )
 
 func TestClientClusterInfo(t *testing.T) {

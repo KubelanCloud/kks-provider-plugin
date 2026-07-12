@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - "v*"
-      - "kloud-csi-*"
+      - "kks-provider-plugin-*"
 
 permissions:
   contents: write
@@ -38,7 +38,7 @@ jobs:
         if: steps.version.outputs.is_app_release == 'true'
         run: |
           version="${{ steps.version.outputs.app_version }}"
-          chart_dir="charts/kloud-csi"
+          chart_dir="charts/kks-provider-plugin"
 
           sed -i "s/^version:.*/version: ${version}/" "${chart_dir}/Chart.yaml"
           sed -i "s/^appVersion:.*/appVersion: \"${version}\"/" "${chart_dir}/Chart.yaml"
@@ -46,7 +46,7 @@ jobs:
           helm lint "${chart_dir}"
           mkdir -p dist
           helm package "${chart_dir}" --destination dist
-          echo "CHART_PACKAGE=dist/kloud-csi-${version}.tgz" >> "$GITHUB_ENV"
+          echo "CHART_PACKAGE=dist/kks-provider-plugin-${version}.tgz" >> "$GITHUB_ENV"
 
       - name: Build changelog
         id: changelog
@@ -112,4 +112,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           owner=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
-          gh api --method PATCH "/orgs/${owner}/packages/container/charts%2Fkloud-csi/visibility" -f visibility=public || true
+          gh api --method PATCH "/orgs/${owner}/packages/container/charts%2Fkks-provider-plugin/visibility" -f visibility=public || true

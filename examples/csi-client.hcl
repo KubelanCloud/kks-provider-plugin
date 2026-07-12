@@ -1,7 +1,7 @@
 # Run on user cluster nodes via Helm, or standalone with:
-#   kks-csi -c examples/csi-client.hcl
+#   kks-provider csi -c examples/csi-client.hcl
 #
-# When installed with charts/kloud-csi, settings come from env vars instead.
+# When installed with charts/kks-provider-plugin, settings come from env vars instead.
 driver {
   name     = "storage.csi.kloud.team"
   endpoint = "unix:///var/lib/kubelet/plugins/storage.csi.kloud.team/csi.sock"

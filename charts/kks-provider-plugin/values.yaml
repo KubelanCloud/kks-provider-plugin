@@ -1,0 +1,100 @@
+# kks-provider-plugin installs both:
+# - KloudLB controller + speaker
+# - Kloud CSI controller + node plugin
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: ghcr.io/kubelancloud/kks-provider-plugin
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+lb:
+  serverURL: "https://lb.kloud.team"
+  accessToken: ""
+  existingSecret: ""
+  existingSecretAccessTokenKey: access-token
+  controller:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+  speaker:
+    interface: eth0
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+  serviceAccount:
+    create: true
+    name: ""
+
+csi:
+  serverURL: "https://storage.csi.kloud.team"
+  accessToken: ""
+  existingSecret: ""
+  existingSecretAccessTokenKey: access-token
+  driver:
+    name: storage.csi.kloud.team
+  sidecars:
+    provisioner:
+      repository: registry.k8s.io/sig-storage/csi-provisioner
+      tag: v5.1.0
+    attacher:
+      repository: registry.k8s.io/sig-storage/csi-attacher
+      tag: v4.7.0
+    registrar:
+      repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
+      tag: v2.12.0
+    livenessProbe:
+      repository: registry.k8s.io/sig-storage/livenessprobe
+      tag: v2.13.1
+  storageClass:
+    enabled: true
+    reclaimPolicy: Delete
+    allowVolumeExpansion: false
+    immediate:
+      enabled: true
+      name: kloud-csi
+      isDefault: true
+      parameters:
+        kks.kloud/provisioning-mode: immediate
+    waitForFirstConsumer:
+      enabled: true
+      name: kloud-csi-wait-for-first-consumer
+      isDefault: false
+      parameters:
+        kks.kloud/provisioning-mode: deferred
+  controller:
+    resources: {}
+  node:
+    resources: {}
+    priorityClassName: system-node-critical
+    tolerations:
+      - operator: Exists
+
+rbac:
+  create: true
+
+podLabels: {}
+podAnnotations: {}
+
+nodeSelector: {}
+affinity: {}
+
+metrics:
+  csi:
+    bindAddress: ":10080"
+  lbController:
+    bindAddress: ":10081"
+  lbSpeaker:
+    bindAddress: ":10082"

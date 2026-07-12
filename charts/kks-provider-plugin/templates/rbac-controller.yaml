@@ -1,19 +1,10 @@
 {{- if .Values.rbac.create }}
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: {{ include "kloud-csi.controllerServiceAccountName" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "kloud-csi.labels" . | nindent 4 }}
-    app.kubernetes.io/component: controller
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "kloud-csi.fullname" . }}-controller
+  name: {{ include "kks-provider-plugin.fullname" . }}-csi-controller
   labels:
-    {{- include "kloud-csi.labels" . | nindent 4 }}
+    {{- include "kks-provider-plugin.labels" . | nindent 4 }}
 rules:
   - apiGroups: [""]
     resources: ["persistentvolumes"]
@@ -49,15 +40,15 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "kloud-csi.fullname" . }}-controller
+  name: {{ include "kks-provider-plugin.fullname" . }}-csi-controller
   labels:
-    {{- include "kloud-csi.labels" . | nindent 4 }}
+    {{- include "kks-provider-plugin.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "kloud-csi.fullname" . }}-controller
+  name: {{ include "kks-provider-plugin.fullname" . }}-csi-controller
 subjects:
   - kind: ServiceAccount
-    name: {{ include "kloud-csi.controllerServiceAccountName" . }}
+    name: {{ include "kks-provider-plugin.lbServiceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 {{- end }}

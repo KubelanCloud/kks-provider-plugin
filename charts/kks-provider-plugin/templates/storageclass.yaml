@@ -1,0 +1,49 @@
+{{- if .Values.csi.storageClass.enabled }}
+{{- if .Values.csi.storageClass.immediate.enabled }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.csi.storageClass.immediate.name }}
+  {{- if .Values.csi.storageClass.immediate.isDefault }}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+  {{- end }}
+  labels:
+    {{- include "kks-provider-plugin.labels" . | nindent 4 }}
+provisioner: {{ .Values.csi.driver.name }}
+reclaimPolicy: {{ .Values.csi.storageClass.reclaimPolicy }}
+volumeBindingMode: Immediate
+allowVolumeExpansion: {{ .Values.csi.storageClass.allowVolumeExpansion }}
+{{- with .Values.csi.storageClass.immediate.parameters }}
+parameters:
+  {{- range $key, $value := . }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- if and .Values.csi.storageClass.immediate.enabled .Values.csi.storageClass.waitForFirstConsumer.enabled }}
+---
+{{- end }}
+{{- if .Values.csi.storageClass.waitForFirstConsumer.enabled }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.csi.storageClass.waitForFirstConsumer.name }}
+  {{- if .Values.csi.storageClass.waitForFirstConsumer.isDefault }}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+  {{- end }}
+  labels:
+    {{- include "kks-provider-plugin.labels" . | nindent 4 }}
+provisioner: {{ .Values.csi.driver.name }}
+reclaimPolicy: {{ .Values.csi.storageClass.reclaimPolicy }}
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: {{ .Values.csi.storageClass.allowVolumeExpansion }}
+{{- with .Values.csi.storageClass.waitForFirstConsumer.parameters }}
+parameters:
+  {{- range $key, $value := . }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

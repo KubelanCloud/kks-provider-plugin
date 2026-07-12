@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/KubelanCloud/kks-csi-plugin/config"
+	"github.com/KubelanCloud/kks-provider-plugin/config"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/wrapperspb"

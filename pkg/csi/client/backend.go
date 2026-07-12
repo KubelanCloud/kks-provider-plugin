@@ -1,9 +1,9 @@
 package client
 
 import (
-	"github.com/KubelanCloud/kks-csi-plugin/config"
-	"github.com/KubelanCloud/kks-csi-plugin/pkg/csi/api"
-	"github.com/KubelanCloud/kks-csi-plugin/pkg/csi/provisioner"
+	"github.com/KubelanCloud/kks-provider-plugin/config"
+	"github.com/KubelanCloud/kks-provider-plugin/pkg/csi/api"
+	"github.com/KubelanCloud/kks-provider-plugin/pkg/csi/provisioner"
 )
 
 func NewBackend(cfg *config.ClientConf) provisioner.Backend {
